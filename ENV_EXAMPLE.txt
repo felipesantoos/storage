@@ -1,0 +1,21 @@
+# Copie este arquivo para src-tauri/.env e preencha com suas credenciais do Cloudflare R2
+
+R2_ACCOUNT_ID=your_account_id_here
+R2_ACCESS_KEY_ID=your_access_key_id_here
+R2_SECRET_ACCESS_KEY=your_secret_access_key_here
+R2_BUCKET_NAME=storage-uploads
+R2_PUBLIC_URL=https://pub-xxxxxxxxxxxxx.r2.dev
+
+# Como obter estas credenciais:
+# 1. Acesse: https://dash.cloudflare.com/
+# 2. Vá em R2 Object Storage
+# 3. Crie um bucket
+# 4. Ative o acesso público (R2.dev subdomain)
+# 5. Crie um API Token em "Manage R2 API Tokens"
+# 6. Copie as credenciais aqui
+
+# IMPORTANTE:
+# - Este arquivo deve ficar em: src-tauri/.env
+# - NUNCA commite o arquivo .env para o Git!
+# - O .env está no .gitignore por segurança
+
