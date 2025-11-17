@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Toaster } from "sonner";
-import { ImageIcon } from "lucide-react";
 import UploadZone from "./components/UploadZone";
 import FileGrid from "./components/FileGrid";
 import WindowControls from "./components/WindowControls";
@@ -25,7 +24,11 @@ function App() {
         <header className="mb-3 sm:mb-6">
           <div className="flex items-center justify-between gap-2 mb-2 sm:mb-4">
             <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-              <ImageIcon className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600 flex-shrink-0" />
+              <img 
+                src="/logo.png" 
+                alt="Storage Logo" 
+                className="w-6 h-6 sm:w-8 sm:h-8 flex-shrink-0 object-contain"
+              />
               <div className="min-w-0">
                 <h1 className="text-lg sm:text-2xl md:text-3xl font-bold text-gray-900 truncate">
                   Storage
