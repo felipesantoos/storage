@@ -10,6 +10,8 @@ Desktop application for uploading images to Cloudflare R2 with instant link copy
 - 🖥️ **Cross-platform**: macOS, Windows, Linux
 - 📦 **Lightweight**: ~8-10MB installed
 - 🔒 **Secure**: Credentials stored locally
+- ⚙️ **Easy Setup**: Configure credentials directly in the app
+- 🚀 **Works in Production**: Credentials persist after installation
 
 ## Prerequisites
 
@@ -42,6 +44,16 @@ npm install
 
 3. **Configure R2 credentials:**
 
+**Opção 1: Através da interface do app (Recomendado para produção)**
+1. Execute o app
+2. Clique no botão "Configurar" no canto superior direito
+3. Preencha suas credenciais do Cloudflare R2
+4. Clique em "Salvar Configurações"
+
+As configurações são salvas em: `~/.storage-app/config.json`
+
+**Opção 2: Usando arquivo `.env` (Para desenvolvimento)**
+
 Create a `.env` file in `src-tauri/` directory:
 ```env
 R2_ACCOUNT_ID=your_account_id
@@ -52,6 +64,10 @@ R2_PUBLIC_URL=https://pub-xxx.r2.dev
 ```
 
 ⚠️ **Important**: Never commit the `.env` file to version control!
+
+**Como funciona:**
+- Em **desenvolvimento**: O app tenta carregar do `.env` primeiro, depois salva em `config.json`
+- Em **produção (app instalado)**: O app usa as configurações de `~/.storage-app/config.json`
 
 4. **Run in development mode:**
 ```bash

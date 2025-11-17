@@ -13,3 +13,11 @@ export interface PresignedUrlResponse {
   publicUrl: string;
 }
 
+export interface R2Config {
+  account_id: string;
+  access_key_id: string;
+  secret_access_key: string;
+  bucket_name: string;
+  public_url: string;
+}
+

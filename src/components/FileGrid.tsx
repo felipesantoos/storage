@@ -46,6 +46,19 @@ export default function FileGrid({ refreshTrigger }: FileGridProps) {
     return () => window.removeEventListener('keydown', handleEscape);
   }, []);
 
+  // Block background scroll when modal is open
+  useEffect(() => {
+    if (deleteConfirm || fullscreenImage) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [deleteConfirm, fullscreenImage]);
+
   const handleDeleteClick = (key: string, filename: string) => {
     console.log("Delete button clicked for:", filename, "key:", key);
     setDeleteConfirm({ key, filename });
@@ -106,7 +119,7 @@ export default function FileGrid({ refreshTrigger }: FileGridProps) {
       {/* Fullscreen Image Viewer */}
       {fullscreenImage && (
         <div 
-          className="fixed inset-0 bg-black bg-opacity-95 flex items-center justify-center z-50 p-4"
+          className="fixed inset-0 bg-black/95 backdrop-blur-sm flex items-center justify-center z-50 p-4"
           onClick={() => setFullscreenImage(null)}
         >
           <button
@@ -132,7 +145,7 @@ export default function FileGrid({ refreshTrigger }: FileGridProps) {
 
       {/* Delete Confirmation Dialog */}
       {deleteConfirm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={handleDeleteCancel}>
+        <div className="fixed inset-0 bg-gray-900/75 backdrop-blur-sm flex items-center justify-center z-50" onClick={handleDeleteCancel}>
           <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl" onClick={(e) => e.stopPropagation()}>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">Delete File?</h3>
             <p className="text-gray-600 mb-1">

@@ -4,11 +4,16 @@ import { ImageIcon } from "lucide-react";
 import UploadZone from "./components/UploadZone";
 import FileGrid from "./components/FileGrid";
 import WindowControls from "./components/WindowControls";
+import ConfigModal from "./components/ConfigModal";
 
 function App() {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const handleUploadComplete = () => {
+    setRefreshTrigger((prev) => prev + 1);
+  };
+
+  const handleConfigSaved = () => {
     setRefreshTrigger((prev) => prev + 1);
   };
 
@@ -30,7 +35,10 @@ function App() {
                 </p>
               </div>
             </div>
-            <WindowControls />
+            <div className="flex items-center gap-2">
+              <ConfigModal onConfigSaved={handleConfigSaved} />
+              <WindowControls />
+            </div>
           </div>
         </header>
 

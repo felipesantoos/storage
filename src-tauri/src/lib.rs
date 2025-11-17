@@ -98,6 +98,40 @@ fn copy_to_clipboard(text: String) -> Result<(), String> {
     Ok(())
 }
 
+#[tauri::command]
+async fn save_config(
+    account_id: String,
+    access_key_id: String,
+    secret_access_key: String,
+    bucket_name: String,
+    public_url: String,
+) -> Result<(), String> {
+    let config = R2Config {
+        account_id,
+        access_key_id,
+        secret_access_key,
+        bucket_name,
+        public_url,
+    };
+    
+    config.save_to_file()?;
+    
+    Ok(())
+}
+
+#[tauri::command]
+async fn get_config() -> Result<R2Config, String> {
+    R2Config::from_env()
+}
+
+#[tauri::command]
+async fn check_config() -> Result<bool, String> {
+    match R2Config::from_env() {
+        Ok(_) => Ok(true),
+        Err(_) => Ok(false),
+    }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -108,6 +142,9 @@ pub fn run() {
             get_files,
             delete_file_from_storage,
             copy_to_clipboard,
+            save_config,
+            get_config,
+            check_config,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

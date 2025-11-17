@@ -2,8 +2,10 @@ use aws_credential_types::Credentials;
 use aws_sdk_s3::{config::Region, presigning::PresigningConfig, Client};
 use serde::{Deserialize, Serialize};
 use std::time::Duration;
+use std::fs;
+use std::path::PathBuf;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct R2Config {
     pub account_id: String,
     pub access_key_id: String,
@@ -13,8 +15,63 @@ pub struct R2Config {
 }
 
 impl R2Config {
+    fn get_config_path() -> Result<PathBuf, String> {
+        let home_dir = dirs::home_dir()
+            .ok_or("Failed to get home directory")?;
+        
+        let config_dir = home_dir.join(".storage-app");
+        
+        // Create config directory if it doesn't exist
+        if !config_dir.exists() {
+            fs::create_dir_all(&config_dir)
+                .map_err(|e| format!("Failed to create config directory: {}", e))?;
+        }
+        
+        Ok(config_dir.join("config.json"))
+    }
+    
+    pub fn load_from_file() -> Result<Self, String> {
+        let config_path = Self::get_config_path()?;
+        
+        if !config_path.exists() {
+            return Err("Configuration file not found. Please configure your R2 credentials.".to_string());
+        }
+        
+        let content = fs::read_to_string(&config_path)
+            .map_err(|e| format!("Failed to read config file: {}", e))?;
+        
+        let config: R2Config = serde_json::from_str(&content)
+            .map_err(|e| format!("Failed to parse config file: {}", e))?;
+        
+        println!("R2 Config loaded from file - Account ID: {}, Bucket: {}", 
+                 config.account_id, config.bucket_name);
+        
+        Ok(config)
+    }
+    
+    pub fn save_to_file(&self) -> Result<(), String> {
+        let config_path = Self::get_config_path()?;
+        
+        let json = serde_json::to_string_pretty(self)
+            .map_err(|e| format!("Failed to serialize config: {}", e))?;
+        
+        fs::write(&config_path, json)
+            .map_err(|e| format!("Failed to write config file: {}", e))?;
+        
+        println!("R2 Config saved to file");
+        
+        Ok(())
+    }
+    
     pub fn from_env() -> Result<Self, String> {
-        // Try to load .env file from multiple locations
+        // First, try to load from config file (for production builds)
+        if let Ok(config) = Self::load_from_file() {
+            return Ok(config);
+        }
+        
+        println!("Config file not found, trying to load from .env file...");
+        
+        // Try to load .env file from multiple locations (for development)
         if let Ok(current_dir) = std::env::current_dir() {
             let env_path = current_dir.join(".env");
             if env_path.exists() {
@@ -34,25 +91,30 @@ impl R2Config {
         dotenv::dotenv().ok();
         
         let account_id = std::env::var("R2_ACCOUNT_ID")
-            .map_err(|_| "R2_ACCOUNT_ID not set in .env file")?;
+            .map_err(|_| "R2_ACCOUNT_ID not set. Please configure your credentials.")?;
         let access_key_id = std::env::var("R2_ACCESS_KEY_ID")
-            .map_err(|_| "R2_ACCESS_KEY_ID not set in .env file")?;
+            .map_err(|_| "R2_ACCESS_KEY_ID not set. Please configure your credentials.")?;
         let secret_access_key = std::env::var("R2_SECRET_ACCESS_KEY")
-            .map_err(|_| "R2_SECRET_ACCESS_KEY not set in .env file")?;
+            .map_err(|_| "R2_SECRET_ACCESS_KEY not set. Please configure your credentials.")?;
         let bucket_name = std::env::var("R2_BUCKET_NAME")
-            .map_err(|_| "R2_BUCKET_NAME not set in .env file")?;
+            .map_err(|_| "R2_BUCKET_NAME not set. Please configure your credentials.")?;
         let public_url = std::env::var("R2_PUBLIC_URL")
-            .map_err(|_| "R2_PUBLIC_URL not set in .env file")?;
+            .map_err(|_| "R2_PUBLIC_URL not set. Please configure your credentials.")?;
         
-        println!("R2 Config loaded - Account ID: {}, Bucket: {}", account_id, bucket_name);
-        
-        Ok(R2Config {
+        let config = R2Config {
             account_id,
             access_key_id,
             secret_access_key,
             bucket_name,
             public_url,
-        })
+        };
+        
+        // Save to config file for future use
+        config.save_to_file().ok();
+        
+        println!("R2 Config loaded from .env and saved to config file");
+        
+        Ok(config)
     }
 }
 
